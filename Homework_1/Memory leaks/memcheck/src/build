@@ -1,0 +1,5 @@
+#!/bin/bash
+# script para compilar
+gcc -I../lib -shared -fPIC -ldl -o ../lib/libmemcheck.so ../lib/libmemcheck.c
+gcc -I../lib -o memcheck memcheck.c
+
