@@ -1,0 +1,20 @@
+Unfortunately, it was not possible to obtain the desired results.
+The malloc and free functions implementation was developed.
+The desired library was compiled and it intercepts the calls
+to malloc, free, realloc and calloc.
+However, the considered method to keep track of the calls to free
+and malloc was to include a local variable in the library that
+keeps track of the number of times malloc and free are called.
+At the same time, it was desired to update a txt file for malloc
+and free calls such that it can be consulted from the main thread.
+It is known that the call to execve somehow replaces the main
+thread with the called function.
+To address this detail, it was considered to call the desired
+binary in a child thread and have the main thread waiting until
+the secondary finishes.
+Once it can continue, it was planned to open the txt files and
+present the report.
+
+This method was not fully implemented because a segmentation fault
+was obtained when including a call to any member of the c library.
+e.g. calling printf, openf nor fprintf.
