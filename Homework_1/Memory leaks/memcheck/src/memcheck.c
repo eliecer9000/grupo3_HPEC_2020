@@ -21,7 +21,12 @@
 #           Report with the number of malloc and free calls
 */
 
-#include <libmemcheck.h>
+#include <ctype.h>
+#include <dlfcn.h>
+#include <getopt.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 void get_help();
 
@@ -87,9 +92,9 @@ int main(int argc, char **argv){
     return 0;
   }
 
-  char *const args[] = {"../../case4",NULL};
-  char *const envs[] = {"LD_PRELOAD=../lib/libmemcheck.so", NULL};
-  execve("../../case4", args, envs);
+  char *const args[] = {p_value ,NULL};
+  char *const envs[] = {"LD_PRELOAD=../lib/.libs/libmemcheck.so", NULL};
+  execve(p_value, args, envs);
 
   return 0;
 }
