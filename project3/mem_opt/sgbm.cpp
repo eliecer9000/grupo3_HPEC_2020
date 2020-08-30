@@ -88,7 +88,7 @@ void StereoFPGA::ComputeAlgo(cv::Mat LeftImg, cv::Mat RightImg, cv::Mat *DepthIm
 
     // Memory to store cost of size: (m_u16height_after_census) * (m_u16width_after_census) * (number of disparities)
     int u32SizeOfInitCost = (m_u16height_after_census)*(m_u16width_after_census)*m_u16TotalDisp;
-    m_ActiveInitCost = new int[u32SizeOfInitCost];
+    m_ActiveInitCost = new uint8_t[u32SizeOfInitCost];
 
     //##################################################################################
     //                                 SGBM Algorithm
@@ -115,8 +115,8 @@ void StereoFPGA::ComputeAlgo(cv::Mat LeftImg, cv::Mat RightImg, cv::Mat *DepthIm
     cv::Mat disparitySGBM(m_u16height_after_census, m_u16width_after_census, CV_8U);
 
     uint32_t u32SizeOfLrCost = m_u8Directions*m_u16height_after_census*m_u16width_after_census*m_u16TotalDisp;
-    m_ActiveLrCost = new int[u32SizeOfLrCost];
-    m_ActiveAggrCost = new int[m_u16height_after_census * m_u16width_after_census *m_u16TotalDisp];
+    m_ActiveLrCost = new uint8_t[u32SizeOfLrCost];
+    m_ActiveAggrCost = new uint16_t[m_u16height_after_census * m_u16width_after_census *m_u16TotalDisp];
 
     compute_SGM(m_ActiveInitCost, &disparitySGBM);
 
@@ -167,13 +167,13 @@ void StereoFPGA::compute_census_transform(cv::Mat img, uint32_t *ct)
 } // end compute_census_transform()
 
 
-int StereoFPGA::compute_hamming_distance (uint32_t a, uint32_t b)
+uint8_t StereoFPGA::compute_hamming_distance (uint32_t a, uint32_t b)
 {
     //#######################################################################################
     //Hamming Distance as cost initialization
     //#######################################################################################
     uint64_t tmp;
-    int sum = 0;
+    uint8_t sum = 0;
 
     tmp = a^b;
     for(int i=0;i<64;i++){
@@ -185,7 +185,7 @@ int StereoFPGA::compute_hamming_distance (uint32_t a, uint32_t b)
 } // end compute_hamming_distance()
 
 
-void StereoFPGA::compute_hamming(uint32_t *ct1, uint32_t *ct2, int *accumulatedCost)
+void StereoFPGA::compute_hamming(uint32_t *ct1, uint32_t *ct2, uint8_t *accumulatedCost)
 {
     //#######################################################################################
     //Hamming Distance as cost initialization
@@ -193,7 +193,7 @@ void StereoFPGA::compute_hamming(uint32_t *ct1, uint32_t *ct2, int *accumulatedC
     for (int i=m_u16yMin; i<m_u16yMax; i++) {
         for (int j=m_u16xMin; j<m_u16xMax; j++) {
             for (int d=0; d<m_u16TotalDisp; d++) {
-                int dist = StereoFPGA::compute_hamming_distance(ct1[i*m_u16width_after_census+j], ct2[i*m_u16width_after_census+j-(d+m_s16MinDisp)]);
+                uint8_t dist = StereoFPGA::compute_hamming_distance(ct1[i*m_u16width_after_census+j], ct2[i*m_u16width_after_census+j-(d+m_s16MinDisp)]);
                 int Loop = (i*m_u16width_after_census+j)*m_u16TotalDisp + d;
                 accumulatedCost[Loop] = dist;
             }
@@ -201,17 +201,17 @@ void StereoFPGA::compute_hamming(uint32_t *ct1, uint32_t *ct2, int *accumulatedC
     }
 } // end compute_cost()
 
-void StereoFPGA::init_Lr(int *Lr, int *initCost) {
-    int sizeOfCpd = m_u16height_after_census*m_u16width_after_census*m_u16TotalDisp;
-    for (int r=0; r<m_u8Directions; r++) {
-        for (int i=0; i<sizeOfCpd; i++) {
+void StereoFPGA::init_Lr(uint8_t *Lr, uint8_t *initCost) {
+    uint8_t sizeOfCpd = m_u16height_after_census*m_u16width_after_census*m_u16TotalDisp;
+    for (uint8_t r=0; r<m_u8Directions; r++) {
+        for (uint8_t i=0; i<sizeOfCpd; i++) {
             Lr[r*sizeOfCpd+i] = initCost[i];
         }
     }
 } // end init_Lr()
 
-int StereoFPGA::find_minLri(int *Lrpr) {
-    int minLri = INT_MAX;
+uint8_t StereoFPGA::find_minLri(uint8_t *Lrpr) {
+    uint8_t minLri = 255;
     for (int i=0; i<m_u16TotalDisp; i++) {
         if (minLri > Lrpr[i]) {
             minLri = Lrpr[i];
@@ -232,7 +232,7 @@ int find_min(int a, int b, int c, int d) {
 } // end find_min()
 
 
-void StereoFPGA::cost_computation(int *Lr, int *initCost) {
+void StereoFPGA::cost_computation(uint8_t *Lr, uint8_t *initCost) {
     //#######################################################################################
     //          SGBM Cost Computation
     //#######################################################################################
@@ -262,15 +262,15 @@ void StereoFPGA::cost_computation(int *Lr, int *initCost) {
                 // Compute p-r
                 int iNorm = i + iDisp; //height
                 int jNorm = j + jDisp; //width
-                int *Lrpr = Lr+((r*m_u16height_after_census+iNorm)*m_u16width_after_census+jNorm)*m_u16TotalDisp;
+                uint8_t *Lrpr = Lr+((r*m_u16height_after_census+iNorm)*m_u16width_after_census+jNorm)*m_u16TotalDisp;
 
                 //#######################################################################################
                 //         Find min_k{Lr(p-r,k)}
                 //#######################################################################################
                 for (int d=0; d<m_u16TotalDisp; d++) {
-                    int Cpd = initCost[(i*m_u16width_after_census+j)*m_u16TotalDisp+d];
+                    uint8_t Cpd = initCost[(i*m_u16width_after_census+j)*m_u16TotalDisp+d];
 
-                    int tmp;
+                    uint8_t tmp;
                     if ( (((r==0)||(r==1))&&(jNorm<0)) || (((r==1)||(r==2)||(r==3))&&(i==0)) || ((r==3)&&(j==m_u16width_after_census-1)))
                     {
                         tmp = Cpd;
@@ -297,21 +297,21 @@ void StereoFPGA::cost_computation(int *Lr, int *initCost) {
     }
 } // end cost_computation()
 
-void StereoFPGA::cost_aggregation(int *aggregatedCost, int *Lr)
+void StereoFPGA::cost_aggregation(uint16_t *aggregatedCost, uint8_t *Lr)
 {
     //#######################################################################################
     //          SGBM Cost Aggregation
     //#######################################################################################
-    for (int i=0; i<m_u16height_after_census; i++)
+    for (uint16_t i=0; i<m_u16height_after_census; i++)
     {
-        for (int j=0; j<m_u16width_after_census; j++)
+        for (uint16_t j=0; j<m_u16width_after_census; j++)
         {
-            for (int d=0; d<m_u16TotalDisp; d++)
+            for (uint16_t d=0; d<m_u16TotalDisp; d++)
             {
-                int *ptr = aggregatedCost + (i*m_u16width_after_census+j)*m_u16TotalDisp+d;
+                uint16_t *ptr = aggregatedCost + (i*m_u16width_after_census+j)*m_u16TotalDisp+d;
                 ptr[0] = 0;
 
-                for (int r=0; r<m_u8Directions; r++)
+                for (uint8_t r=0; r<m_u8Directions; r++)
                 {
                     ptr[0] += Lr[((r*m_u16height_after_census+i)*m_u16width_after_census+j)*m_u16TotalDisp+d];
                 }
@@ -320,7 +320,7 @@ void StereoFPGA::cost_aggregation(int *aggregatedCost, int *Lr)
     }
 }// end cost_aggregation()
 
-int StereoFPGA::compute_SGM(int *initCost, cv::Mat *disparitySGBM)
+int StereoFPGA::compute_SGM(uint8_t *initCost, cv::Mat *disparitySGBM)
 {
     //##################################################################################
     //          SGBM Algorithm
@@ -340,7 +340,7 @@ int StereoFPGA::compute_SGM(int *initCost, cv::Mat *disparitySGBM)
     return 0;
 }
 
-void saveDisparityMap(int *disparity, cv::Mat *disparityMap, float_t m_fFactor) {
+void saveDisparityMap(uint16_t *disparity, cv::Mat *disparityMap, float_t m_fFactor) {
     int width = disparityMap->cols;
 
     for (int i = 0; i < disparityMap->rows; ++i) {
@@ -358,20 +358,20 @@ void saveDisparityMap(int *disparity, cv::Mat *disparityMap, float_t m_fFactor) 
 
 } // end saveDisparityMap
 
-void StereoFPGA::calc_disp(int *Cost, cv::Mat *disparityBM)
+void StereoFPGA::calc_disp(uint16_t *Cost, cv::Mat *disparityBM)
 {
     //#######################################################################################
     //          SGBM Disparity Computation
     //#######################################################################################
-    int *bm_output = new int[m_u16height_after_census * m_u16width_after_census];
+    uint16_t *bm_output = new uint16_t[m_u16height_after_census * m_u16width_after_census];
 
     for (int i=0; i<m_u16height_after_census; i++) {
         for (int j=0; j<m_u16width_after_census; j++) {
-            int *costPtr = Cost + (i*m_u16width_after_census+j)*m_u16TotalDisp;
-            int minCost = costPtr[0];
-            int SecondBest = INT_MAX;
-            int mind = 0;
-            for (int d=1; d<m_u16TotalDisp; d++) {
+            uint16_t *costPtr = Cost + (i*m_u16width_after_census+j)*m_u16TotalDisp;
+            uint16_t minCost = costPtr[0];
+            uint16_t SecondBest = 0xFFFF;
+            uint16_t mind = 0;
+            for (uint16_t d=1; d<m_u16TotalDisp; d++) {
                 if (costPtr[d] < minCost) {
                     SecondBest = minCost;
                     minCost = costPtr[d];

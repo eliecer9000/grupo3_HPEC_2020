@@ -25,16 +25,16 @@ private:
      * Functions/Variables Deklaration
      *********************************/
   void compute_census_transform (cv::Mat img, uint32_t * ct);
-  int compute_hamming_distance (uint32_t a, uint32_t b);
-  void compute_hamming (uint32_t * ct1, uint32_t * ct2, int *accumulatedCost);
+  uint8_t compute_hamming_distance (uint32_t a, uint32_t b);
+  void compute_hamming (uint32_t * ct1, uint32_t * ct2, uint8_t *accumulatedCost);
 
-  int compute_SGM (int *initCost, cv::Mat * disparitySGBM);
-  void cost_aggregation (int *aggregatedCost, int *Lr);
-  void cost_computation (int *Lr, int *initCost);
-  int find_minLri (int *Lrpr);
-  void init_Lr (int *Lr, int *initCost);
+  int compute_SGM (uint8_t *initCost, cv::Mat * disparitySGBM);
+  void cost_aggregation (uint16_t *aggregatedCost, uint8_t *Lr);
+  void cost_computation (uint8_t *Lr, uint8_t *initCost);
+  uint8_t find_minLri (uint8_t *Lrpr);
+  void init_Lr (uint8_t *Lr, uint8_t *initCost);
 
-  void calc_disp (int *Cost, cv::Mat * disparityBM);
+  void calc_disp (uint16_t *Cost, cv::Mat * disparityBM);
 
   uint8_t m_u8Directions;
   uint16_t m_u16height_after_census, m_u16width_after_census;
@@ -42,9 +42,9 @@ private:
   uint16_t m_u16TotalDisp;
 
 
-  int *m_ActiveInitCost = nullptr;
-  int *m_ActiveLrCost = nullptr;
-  int *m_ActiveAggrCost = nullptr;
+  uint8_t *m_ActiveInitCost = nullptr;
+  uint8_t *m_ActiveLrCost = nullptr;
+  uint16_t *m_ActiveAggrCost = nullptr;
 
 };
 
