@@ -17,9 +17,9 @@ StereoAlgo::~StereoAlgo()
 
 }
 
-void StereoAlgo::ComputeAlgo(cv::Mat LeftImg, cv::Mat RightImg, cv::Mat *DepthImg)
+double * StereoAlgo::ComputeAlgo(cv::Mat /*LeftImg*/, cv::Mat /*RightImg*/, cv::Mat */*DepthImg*/)
 {
-
+    return NULL;
 }
 
 e_StereoAlgoType StereoAlgo::GetStereoType(void)
@@ -27,7 +27,7 @@ e_StereoAlgoType StereoAlgo::GetStereoType(void)
     return m_eStereoAlgo;
 }
 
-void StereoAlgo::GetPixelCostFunction(int **ppCostFncPtr, int32_t *ps32CostSize, uint16_t u16XPos, uint16_t u16YPos, e_PlotCost ePlotFunc)
+void StereoAlgo::GetPixelCostFunction(int **ppCostFncPtr, int32_t *ps32CostSize, uint16_t /*u16XPos*/, uint16_t /*u16YPos*/, e_PlotCost /*ePlotFunc*/)
 {
     *ppCostFncPtr = nullptr;
     *ps32CostSize = 0;

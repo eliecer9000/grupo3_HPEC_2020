@@ -2,6 +2,7 @@
 #define STEREOFPGA_H
 
 #include "stereoalgo.h"
+#include "omp.h"
 
 class StereoFPGA:public StereoAlgo
 {
@@ -16,7 +17,7 @@ public:
      * Functions/Variables Deklaration
      ******************************/
   void SetNumOfDirections (uint8_t u8NewDirect);
-  void ComputeAlgo (cv::Mat LeftImg, cv::Mat RightImg, cv::Mat * DepthImg);
+  double *ComputeAlgo (cv::Mat LeftImg, cv::Mat RightImg, cv::Mat * DepthImg);
   uint16_t m_u16xMin, m_u16xMax, m_u16yMin, m_u16yMax;
   uint8_t m_u8BlockSize_half;
 
@@ -28,9 +29,9 @@ private:
   uint8_t compute_hamming_distance (uint32_t a, uint32_t b);
   void compute_hamming (uint32_t * ct1, uint32_t * ct2, uint8_t *accumulatedCost);
 
-  int compute_SGM (uint8_t *initCost, cv::Mat * disparitySGBM);
+  double * compute_SGM (uint8_t *initCost, cv::Mat * disparitySGBM);
   void cost_aggregation (uint16_t *aggregatedCost, uint8_t *Lr);
-  void cost_computation (uint8_t *Lr, uint8_t *initCost);
+  double cost_computation (uint8_t *Lr, uint8_t *initCost);
   uint8_t find_minLri (uint8_t *Lrpr);
   void init_Lr (uint8_t *Lr, uint8_t *initCost);
 
