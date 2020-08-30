@@ -36,7 +36,7 @@ public:
     /*******************************
      * Funktionsdeklaration
      ******************************/
-    virtual void ComputeAlgo(cv::Mat LeftImg, cv::Mat RightImg, cv::Mat *DepthImg);
+    virtual double *ComputeAlgo(cv::Mat LeftImg, cv::Mat RightImg, cv::Mat *DepthImg);
 
     virtual void SetMinDisp(int16_t s16MinDisp);
     virtual void SetMaxDisp(int16_t s16MaxDisp);

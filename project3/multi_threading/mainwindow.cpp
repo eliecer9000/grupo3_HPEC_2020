@@ -238,7 +238,13 @@ int MainWindow::on_B_Run_clicked()
     /**********************************************
      * Compute SGBM and copy the result in DepthImg
      **********************************************/
-    m_pStereoImg->ComputeAlgo(in_imgL, in_imgR, &DepthImg);
+    double * Cost_Compu_Time_array = m_pStereoImg->ComputeAlgo(in_imgL, in_imgR, &DepthImg);
+
+    ui->L_CostCompTime_seconds->setText(QString::fromStdString(to_string(Cost_Compu_Time_array[0])));
+    ui->L_find_minLri_time_seconds->setText(QString::fromStdString(to_string(Cost_Compu_Time_array[1])));
+    ui->L_compute_hamming_time_seconds->setText(QString::fromStdString(to_string(Cost_Compu_Time_array[2])));
+
+    delete [] Cost_Compu_Time_array;
 
     /**************************************************************************
      * Show region of interest (see Figure 4 of LH) of the Depth Map in the GUI
